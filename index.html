@@ -187,7 +187,7 @@ button, a, input, select { min-height: 44px; }
 <div class="a11y-body">
 <section class="a11y-group" aria-labelledby="contentTools"><h3 id="contentTools">Contenido</h3><div class="a11y-grid"><button class="tool" type="button" id="textSize" aria-pressed="false"><i data-lucide="zoom-in"></i><span>Texto más grande</span><span class="level" aria-hidden="true"><span class="on"></span><span></span><span></span></span></button><button class="tool" type="button" data-toggle="big-cursor" aria-pressed="false"><i data-lucide="mouse-pointer-2"></i><span>Cursor grande</span></button><button class="tool" type="button" data-toggle="tooltips-on" aria-pressed="false"><i data-lucide="message-square-more"></i><span>Ayudas visuales</span></button><button class="tool" type="button" data-toggle="hide-images" aria-pressed="false"><i data-lucide="image-off"></i><span>Ocultar imágenes</span></button><button class="tool" type="button" data-toggle="readable" aria-pressed="false"><i data-lucide="type"></i><span>Fuente legible</span></button><button class="tool" type="button" data-toggle="dark" aria-pressed="false"><i data-lucide="moon"></i><span>Modo oscuro</span></button></div></section>
 <section class="a11y-group" aria-labelledby="colorTools"><h3 id="colorTools">Colores</h3><div class="a11y-grid"><button class="tool" type="button" data-toggle="invert-on" aria-pressed="false"><i data-lucide="circle-dot-dashed"></i><span>Invertir colores</span></button><button class="tool" type="button" id="brightness" aria-pressed="false"><i data-lucide="sun"></i><span>Brillo</span><span class="level" aria-hidden="true"><span class="on"></span><span></span><span></span></span></button><button class="tool" type="button" data-toggle="high-contrast" aria-pressed="false"><i data-lucide="circle-half"></i><span>Alto contraste</span></button><button class="tool" type="button" data-toggle="gray-on" aria-pressed="false"><i data-lucide="blend"></i><span>Escala de grises</span></button><button class="tool" type="button" id="saturation" aria-pressed="false"><i data-lucide="droplet"></i><span>Saturación</span><span class="level" aria-hidden="true"><span class="on"></span><span></span><span></span></span></button></div></section>
-<section class="a11y-group" aria-labelledby="navTools"><h3 id="navTools">Navegación</h3><div class="a11y-grid"><button class="tool" type="button" data-toggle="guide-on" aria-pressed="false"><i data-lucide="minus"></i><span>Guía de lectura</span></button><button class="tool" type="button" data-toggle="links-on" aria-pressed="false"><i data-lucide="link"></i><span>Resaltar enlaces</span></button><button class="tool" type="button" data-toggle="no-motion" aria-pressed="false"><i data-lucide="pause"></i><span>Reducir movimiento</span></button></div></section>
+<section class="a11y-group" aria-labelledby="navTools"><h3 id="navTools">Navegación</h3><div class="a11y-grid"><button class="tool" type="button" data-toggle="guide-on" aria-pressed="false"><i data-lucide="minus"></i><span>Guía de lectura</span></button><button class="tool" type="button" data-toggle="links-on" aria-pressed="false"><i data-lucide="link"></i><span>Resaltar enlaces</span></button><button class="tool" type="button" data-toggle="no-motion" aria-pressed="false"><i data-lucide="pause"></i><span>Reducir movimiento</span></button><button class="tool" type="button" id="ttsOpen" aria-pressed="false"><i data-lucide="volume-2"></i><span>Escuchar el sitio</span></button></div></section>
 <button class="reset" id="a11yReset" type="button"><i data-lucide="rotate-ccw"></i> Restablecer ajustes</button>
 </div><div class="a11y-foot"><span>Declaración de accesibilidad</span><span>Reportar un problema</span></div></aside>
 <script>
@@ -212,5 +212,94 @@ document.addEventListener('click', async (event) => {
     setTimeout(() => { button.innerHTML = original; if (window.lucide) lucide.createIcons(); }, 1400);
   } catch (_) {}
 });
+</script>
+<style>
+.tts-bar{position:fixed;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));z-index:9997;display:flex;align-items:center;gap:6px;max-width:calc(100vw - 110px);padding:8px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;box-shadow:0 12px 36px #0003}
+.tts-bar[hidden]{display:none}
+.tts-bar button{width:40px;height:40px;border:0;border-radius:50%;background:var(--accent2);color:var(--accent);display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+.tts-bar button.main{background:var(--accent);color:#fff}
+.tts-bar svg{width:20px;height:20px}
+.tts-bar button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.tts-info{font-size:.85rem;font-weight:600;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tts-current{outline:3px solid var(--focus);outline-offset:6px;border-radius:12px}
+@media(max-width:600px){.tts-info{display:none}.tts-bar{bottom:16px;left:16px}}
+</style>
+<div class="tts-bar" id="ttsBar" role="region" aria-label="Reproductor de audio del sitio" hidden>
+<button type="button" id="ttsPrev" aria-label="Sección anterior"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+<button type="button" class="main" id="ttsPlay" aria-label="Pausar"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+<button type="button" id="ttsNext" aria-label="Sección siguiente"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg></button>
+<button type="button" id="ttsStop" aria-label="Detener audio"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg></button>
+<span class="tts-info" id="ttsInfo" aria-live="polite"></span>
+</div>
+<script>
+// Versión en audio: lee el sitio sección por sección con la voz del navegador
+(function(){
+  const synth = window.speechSynthesis;
+  const btn = document.getElementById('ttsOpen');
+  if (!synth || !window.SpeechSynthesisUtterance) { if (btn) btn.hidden = true; return; }
+  const bar = document.getElementById('ttsBar'), play = document.getElementById('ttsPlay'), info = document.getElementById('ttsInfo');
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>';
+  let sections = [], idx = 0, chunks = [], ci = 0, active = false, paused = false, token = 0;
+
+  function textOf(sec) {
+    const clone = sec.cloneNode(true);
+    clone.querySelectorAll('pre,code,svg,button,script,style,[aria-hidden="true"],.skill-visual,.mock').forEach(n => n.remove());
+    const title = (clone.querySelector('h1,h2') || {}).textContent || '';
+    const body = clone.innerText || clone.textContent || '';
+    return { title: title.trim().replace(/\s+/g, ' '), text: body.replace(/\s*\n\s*/g, '. ').replace(/\.\s*\./g, '.').replace(/\s+/g, ' ').trim() };
+  }
+  function split(t) {
+    const out = []; (t.match(/[^.!?:;]+[.!?:;]?/g) || []).forEach(s => { s = s.trim(); if (s) out.push(s.slice(0, 220)); });
+    return out;
+  }
+  function pickVoice() {
+    const v = synth.getVoices();
+    return v.find(x => /^es-(MX|US|419)/i.test(x.lang)) || v.find(x => /^es/i.test(x.lang)) || null;
+  }
+  function mark(sec) {
+    document.querySelectorAll('.tts-current').forEach(n => n.classList.remove('tts-current'));
+    if (sec) { sec.classList.add('tts-current'); sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+  function speakSection(i) {
+    if (i < 0 || i >= sections.length) { stop(); return; }
+    idx = i; ci = 0;
+    const s = textOf(sections[idx]);
+    chunks = split((s.title ? 'Sección: ' + s.title + '. ' : '') + s.text);
+    info.textContent = s.title || 'Sección ' + (idx + 1);
+    mark(sections[idx]);
+    next(++token);
+  }
+  function next(my) {
+    if (my !== token || !active) return;
+    if (ci >= chunks.length) { speakSection(idx + 1); return; }
+    const u = new SpeechSynthesisUtterance(chunks[ci++]);
+    u.lang = 'es-MX'; const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = 1; u.onend = () => next(my); u.onerror = e => { if (e.error !== 'canceled' && e.error !== 'interrupted') next(my); };
+    synth.speak(u);
+  }
+  function start() {
+    sections = Array.from(document.querySelectorAll('main > section')).filter(s => textOf(s).text.length > 20);
+    active = true; paused = false; bar.hidden = false; play.innerHTML = ICON_PAUSE; play.setAttribute('aria-label', 'Pausar');
+    btn.setAttribute('aria-pressed', 'true');
+    synth.cancel(); token++; speakSection(0); play.focus();
+  }
+  function stop() {
+    active = false; paused = false; token++; synth.cancel(); mark(null); bar.hidden = true;
+    btn.setAttribute('aria-pressed', 'false');
+  }
+  function go(i) { if (!active) return; paused = false; play.innerHTML = ICON_PAUSE; play.setAttribute('aria-label', 'Pausar'); synth.cancel(); token++; speakSection(Math.max(0, Math.min(sections.length - 1, i))); }
+  btn.addEventListener('click', () => active ? stop() : start());
+  play.addEventListener('click', () => {
+    if (paused) { synth.resume(); paused = false; play.innerHTML = ICON_PAUSE; play.setAttribute('aria-label', 'Pausar'); }
+    else { synth.pause(); paused = true; play.innerHTML = ICON_PLAY; play.setAttribute('aria-label', 'Reanudar'); }
+  });
+  document.getElementById('ttsPrev').addEventListener('click', () => go(idx - 1));
+  document.getElementById('ttsNext').addEventListener('click', () => go(idx + 1));
+  document.getElementById('ttsStop').addEventListener('click', stop);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && active) stop(); });
+  window.addEventListener('beforeunload', () => synth.cancel());
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
+})();
 </script>
 </body></html>
